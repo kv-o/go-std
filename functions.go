@@ -7,6 +7,16 @@
 // of useful identifiers for general programming.
 package std
 
+import "fmt"
+
+// Access attempts to access the nth element of slice s.
+func Access(s []any, n int) error {
+	if n > len(s)-1 || n < 0 {
+		return fmt.Errorf("index out of range [%d] with length %d", n, len(s))
+	}
+	return nil
+}
+
 // Contains checks slice s for the existence of an element elem.
 func Contains[T comparable](s []T, elem T) bool {
 	for _, v := range s {
