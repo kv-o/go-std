@@ -9,8 +9,16 @@ package std
 
 import "fmt"
 
-// Access attempts to access the nth element of slice s.
-func Access[T comparable](s []T, n int) error {
+// Slice represents any slice type. The Slice interface may only be used as a
+// type parameter constraint, not as the type of a variable. 
+type Slice interface {
+	[]any | []bool | []complex128 | []complex64 | []float32 | []float64 |
+		[]int | []int16 | []int32 | []int64 | []int8 | string | []string |
+		[]uint | []uint16 | []uint32 | []uint64 | []uint8 | []uintptr
+}
+
+// Access attempts to access the nth element of slice, string, or array s.
+func Access[T Slice](s T, n int) error {
 	if n > len(s)-1 || n < 0 {
 		return fmt.Errorf("index out of range [%d] with length %d", n, len(s))
 	}
