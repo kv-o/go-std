@@ -17,7 +17,7 @@ type Slice interface {
 		[]uint | []uint16 | []uint32 | []uint64 | []uint8 | []uintptr
 }
 
-// Access attempts to access the nth element of slice, string, or array s.
+// Access attempts to access the nth element of slice s.
 func Access[T Slice](s T, n int) error {
 	if n > len(s)-1 || n < 0 {
 		return fmt.Errorf("index out of range [%d] with length %d", n, len(s))
