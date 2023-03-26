@@ -9,15 +9,19 @@ package std
 
 import "fmt"
 
-// Slice represents any slice type. The Slice interface may only be used as a
-// type parameter constraint, not as the type of a variable. 
+// Slice represents any slice type, excluding slices of slices. The Slice
+// interface may only be used as a type parameter constraint, not as the type of
+// a variable.
 type Slice interface {
-	[]any | []bool | []complex128 | []complex64 | []float32 | []float64 |
-		[]int | []int16 | []int32 | []int64 | []int8 | string | []string |
-		[]uint | []uint16 | []uint32 | []uint64 | []uint8 | []uintptr
+	~[]any | ~[]bool | ~[]complex128 | ~[]complex64 | ~[]float32 | ~[]float64 |
+		~[]int | ~[]int16 | ~[]int32 | ~[]int64 | ~[]int8 | ~string |
+		~[]string | ~[]uint | ~[]uint16 | ~[]uint32 | ~[]uint64 | ~[]uint8 |
+		~[]uintptr
 }
 
-// Access attempts to access the nth element of slice s.
+// Access attempts to access the nth element of slice s. Due to limitations in
+// the Go programming language, s cannot be a slice of slices. The current
+// workaround for this is to use make([]bool, len(s)) as the parameter s.
 func Access[T Slice](s T, n int) error {
 	if n > len(s)-1 || n < 0 {
 		return fmt.Errorf("index out of range [%d] with length %d", n, len(s))
