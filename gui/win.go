@@ -15,7 +15,6 @@ package gui
 
 import (
 	"image/draw"
-	"io"
 )
 
 // Conn is a generic, abstracted connection to an underlying GUI.
@@ -38,11 +37,11 @@ type Event struct {
 
 // List of event types.
 const (
-	KbDown     = 0x001,
-	KbHold     = 0x002,
-	KbUp       = 0x003,
+	KbDown     = 0x001
+	KbHold     = 0x002
+	KbUp       = 0x003
 	Tap        = 0x004
-	WinChange  = 0x003,
+	WinChange  = 0x003
 )
 
 // List of common non-linguistic keys.
