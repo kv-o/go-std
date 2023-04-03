@@ -18,27 +18,101 @@ import (
 	"io"
 )
 
-// Open attempts to open a Window in the current GUI (if one exists), set up a
-// Stdin interface, and provides access to a Pointer. Returns error as soon as
-// one is encountered.
-func Open() (Window, Stdin, Pointer, error) {
-	return open()
+// Conn is a generic, abstracted connection to an underlying GUI.
+type Conn interface {
+	// Events returns an event channel over which GUI events are sent.
+	Events() chan Event
+	// Pointer returns a Pointer on success.
+	// Each call returns a copy of the same Pointer.
+	Pointer() (Pointer, error)
+	// Window returns a Window on success.
+	// Each call returns a copy of the same Window.
+	Window() (Window, error)
 }
 
-// Window is a draw.Image that represents a rectangular area of an underlying
-// GUI.
-type Window interface {
-	draw.Image
+// Event is a string code for an event.
+type Event struct {
+	Type   uint32
+	Value  string
 }
 
-// Stdin multiplexes os.Stdin and platform-specific input provided by the
-// underlying GUI.
-type Stdin interface {
-	io.Reader
-}
+// List of event types.
+const (
+	KbDown     = 0x001,
+	KbHold     = 0x002,
+	KbUp       = 0x003,
+	Tap        = 0x004
+	WinChange  = 0x003,
+)
+
+// List of common non-linguistic keys.
+const (
+	KeyAlt        = "alt"
+	KeyBackspace  = "backspace"
+	KeyBreak      = "break"
+	KeyCapsLock   = "capslock"
+	KeyCtrl       = "ctrl"
+	KeyDel        = "delete"
+	KeyDown       = "down"
+	KeyEnd        = "end"
+	KeyEscape     = "escape"
+	KeyF1         = "f1"
+	KeyF2         = "f2"
+	KeyF3         = "f3"
+	KeyF4         = "f4"
+	KeyF5         = "f5"
+	KeyF6         = "f6"
+	KeyF7         = "f7"
+	KeyF8         = "f8"
+	KeyF9         = "f9"
+	KeyF10        = "f10"
+	KeyF11        = "f11"
+	KeyF12        = "f12"
+	KeyFn         = "fn"
+	KeyFnLock     = "fnlock"
+	KeyHome       = "home"
+	KeyInsert     = "insert"
+	KeyLeft       = "left"
+	KeyNumLock    = "numlock"
+	KeyPause      = "pause"
+	KeyPgDown     = "pagedown"
+	KeyPgUp       = "pageup"
+	KeyPrtScr     = "prtscr"
+	KeyRight      = "right"
+	KeyScrollLock = "scrolllock"
+	KeyShift      = "shift"
+	KeySuper      = "super"
+	KeyUp         = "up"
+)
+
+// List of common events.
+var (
+	// Left mouse button for right-handed people, single finger tap on touchscreen.
+	Mouse1  = Event{Tap, "Mouse1"}
+	// Middle mouse button or equivalent.
+	Mouse2  = Event{Tap, "Mouse2"}
+	// Right mouse button for right-handed people, or equivalent.
+	Mouse3  = Event{Tap, "Mouse3"}
+	Resize  = Event{WinChange, "Resize"}
+)
 
 // Pointer represents the current position of the pointing device or the last
 // position of physical contact.
 type Pointer interface {
 	Pos() (x, y int)
+}
+
+// Window is a draw.Image that represents a rectangular area of an underlying
+// two-dimensional GUI.
+type Window interface {
+	draw.Image
+	// Title requests the underlying window manager to set name as the window
+	// title.
+	Title(name string) error
+}
+
+// Dial attempts to establish a connection to the current underlying GUI (if one
+// exists).
+func Dial() (Conn, error) {
+	return dial()
 }
