@@ -9,12 +9,18 @@ package std
 
 import "fmt"
 
-// Access attempts to access the nth element of slice s.
-func Access[T any](s []T, n int) error {
+// Access returns the nth element of slice s. Returns error if slice s does not
+// have an element at index n.
+//
+// For most access attempts on strings, []rune(str) will be a more appropriate
+// choice than []byte(str) for the parameter s, as no individual byte in
+// []byte(str) is guaranteed to hold a single Unicode code point.
+func Access[T any](s []T, n int) (T, error) {
+	var none T
 	if n > len(s)-1 || n < 0 {
-		return fmt.Errorf("index out of range [%d] with length %d", n, len(s))
+		return none, fmt.Errorf("index out of range [%d] with length %d", n, len(s))
 	}
-	return nil
+	return s[n], nil
 }
 
 // Contains checks slice s for the existence of an element elem.
