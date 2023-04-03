@@ -1,7 +1,6 @@
 package gui
 
-func open() (Window, Stdin, Pointer, error) {
+func dial() (Conn, error) {
 	// TODO: Complete this function.
-
-	return nil, nil, nil, nil
+	return nil, nil
 }
