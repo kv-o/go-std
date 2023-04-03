@@ -19,8 +19,8 @@ import (
 
 // Conn is a generic, abstracted connection to an underlying GUI.
 type Conn interface {
-	// Events returns an event channel over which GUI events are sent.
-	Events() chan Event
+	// Events returns a read-only event channel over which GUI events are sent.
+	Events() <-chan Event
 	// Pointer returns a Pointer on success.
 	// Each call returns a copy of the same Pointer.
 	Pointer() (Pointer, error)
