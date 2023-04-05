@@ -1,3 +1,5 @@
+//go:build unix && !android && !darwin && !ios && !plan9
+
 package gui
 
 import (
@@ -12,6 +14,7 @@ import (
 )
 
 type wlPtr struct {
+	conn net.Conn
 }
 
 func (p wlPtr) Pos() (x, y int) {
@@ -20,6 +23,7 @@ func (p wlPtr) Pos() (x, y int) {
 }
 
 type wlWin struct {
+	conn net.Conn
 }
 
 func (w wlWin) At(x, y int) color.Color {
@@ -54,18 +58,18 @@ func (w wlConn) Events() <-chan Event {
 	return events
 }
 
-func (w wlConn) Pointer() (Pointer, error) {
-	return wlPtr{}, nil
+func (w wlConn) Pointer() Pointer {
+	return wlPtr{}
 }
 
-func (w wlConn) Window() (Window, error) {
-	return wlWin{}, nil
+func (w wlConn) Window() Window {
+	return wlWin{}
 }
 
-// Attempts to establish a connection with Wayland, or, if that fails, with X11.
+// dial attempts to establish a connection with Wayland, or, if that fails, with
+// X11.
 func dial() (Conn, error) {
 	var display string
-	// Check for WAYLAND_SOCKET
 	display = os.Getenv("WAYLAND_DISPLAY")
 	if display == "" {
 		display = "wayland-0"
@@ -82,9 +86,9 @@ func dial() (Conn, error) {
 		display = filepath.Join(xdgRt, display)
 	}
 	netConn, err := net.Dial("unix", display)
-	if err != nil {
-		return nil, fmt.Errorf("gui: failed to dial display: %v", err)
+	if err == nil {
+		return wlConn{netConn}, nil
 	}
 	// TODO: Add X11 support.
-	return wlConn{netConn}, nil
+	return nil, fmt.Errorf("gui: failed to dial display: %v", err)
 }
