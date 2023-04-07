@@ -84,6 +84,11 @@ const (
 
 // List of common events.
 var (
+	// Window close event. Signals a request for the termination of the GUI
+	// session.
+	Close   = Event{WinChange, "Close"}
+	// Underlying GUI error.
+	Error   = Event{WinChange, "Error"}
 	// Left mouse button for right-handed people, single finger tap on touchscreen.
 	Mouse1  = Event{Tap, "Mouse1"}
 	// Middle mouse button or equivalent.
