@@ -13,6 +13,8 @@ import (
 	"codeberg.org/kvo/std"
 )
 
+// Wayland support.
+
 type wlPtr struct {
 	conn net.Conn
 }
@@ -53,8 +55,12 @@ type wlConn struct {
 	conn net.Conn
 }
 
+func wlListen(net.Conn, events chan Event) {
+}
+
 func (w wlConn) Events() <-chan Event {
 	events := make(chan Event)
+	go wlListen(w.conn, events)
 	return events
 }
 
