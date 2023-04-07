@@ -1,4 +1,4 @@
-// Package platforms collects a list of platform names, codenames, and code
+// Package platform collects a list of platform names, codenames, and code
 // characters.
 //
 // When targeting specific platforms, it is preferable to have a list of
@@ -7,7 +7,9 @@
 // resultant platform designation may still be slightly too verbose for
 // frequent use. This is why, aside from providing codenames for each supported
 // platform, a code character is provided as well.
-package platforms
+package platform
+
+import "runtime"
 
 // Platform represents a platform, whether it be a CPU architecture or an OS.
 type Platform struct {
@@ -17,14 +19,13 @@ type Platform struct {
 }
 
 // The following is a list of platform structures which provide code character,
-// codename, and name associations for each platform supported by the standard
-// Go compiler.
+// codename, and name associations for known platforms.
 var (
 	// CPU architectures
 	Amd64    = Platform{'6', "amd64", "AMD64"}
 	Arm      = Platform{'5', "arm", "little-endian ARM"}
 	Arm64    = Platform{'7', "arm64", "little-endian ARM (64-bit)"}
-	I386     = Platform{'8', "386", "Intel 80386 and compatibles"}
+	I386     = Platform{'8', "i386", "Intel 80386 and compatibles"}
 	Loong64  = Platform{'l', "loong64", "Loongson (64-bit)"}
 	Mips     = Platform{'0', "mips", "big-endian MIPS32"}
 	Mips64   = Platform{'1', "mips64", "big-endian MIPS64"}
@@ -51,7 +52,7 @@ var (
 	Windows   = Platform{'w', "windows", "Windows NT"}
 )
 
-// Arch is a slice of all supported CPU architectures.
+// Arch is a slice of all known CPU architectures.
 var Arch = []Platform{
 	Amd64,
 	Arm,
@@ -68,7 +69,7 @@ var Arch = []Platform{
 	S390x,
 }
 
-// OS is a slice of all supported operating systems.
+// OS is a slice of all known operating systems.
 var OS = []Platform{
 	Aix,
 	Android,
@@ -84,6 +85,16 @@ var OS = []Platform{
 	Plan9,
 	Solaris,
 	Windows,
+}
+
+// Return the current CPU architecture and OS.
+func Current() (arch, os Platform) {
+	switch runtime.GOARCH {
+	case "386":
+		return WithCodeName(Arch, "i386"), WithCodeName(OS, runtime.GOOS)
+	default:
+		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, runtime.GOOS)
+	}
 }
 
 // WithCodeChar returns the first platform in p with the given code character r.
