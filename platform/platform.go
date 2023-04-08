@@ -32,7 +32,7 @@ var (
 	Mips64   = Platform{'1', "mips64", "big-endian MIPS64"}
 	Mips64le = Platform{'2', "mips64le", "MIPS64 (little-endian)"}
 	Mipsle   = Platform{'3', "mipsle", "MIPS32 (little-endian)"}
-	Powerpc  = Platform{'p', "powerpc", "Power PC"}
+	Ppc      = Platform{'p', "ppc", "Power PC"}
 	Ppc64    = Platform{'4', "ppc64", "Power PC (64-bit)"}
 	Ppc64le  = Platform{'9', "ppc64le", "Power PC (64-bit, little-endian)"}
 	Riscv64  = Platform{'r', "riscv64", "RISC-V (64-bit)"}
@@ -67,7 +67,7 @@ var Arch = []Platform{
 	Mips64,
 	Mips64le,
 	Mipsle,
-	Powerpc,
+	Ppc,
 	Ppc64,
 	Ppc64le,
 	Riscv64,
