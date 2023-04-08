@@ -42,7 +42,7 @@ var (
 	Aix       = Platform{'x', "aix", "IBM AIX"}
 	Android   = Platform{'a', "android", "Android"}
 	Bare      = Platform{'b', "bare", "Bare metal"}
-	Dragonfly = Platform{'y', "dragonfly", "DragonFly BSD"}
+	Dragonfly = Platform{'d', "dragonfly", "DragonFly BSD"}
 	Freebsd   = Platform{'f', "freebsd", "FreeBSD"}
 	Illumos   = Platform{'m', "illumos", "Illumos"}
 	Ios       = Platform{'i', "ios", "iOS"}
