@@ -27,6 +27,7 @@ var (
 	Arm64    = Platform{'7', "arm64", "little-endian ARM (64-bit)"}
 	I386     = Platform{'8', "i386", "Intel 80386 and compatibles"}
 	Loong64  = Platform{'l', "loong64", "Loongson (64-bit)"}
+	M68k     = Platform{'m', "m68k", "Motorola 68000")
 	Mips     = Platform{'0', "mips", "big-endian MIPS32"}
 	Mips64   = Platform{'1', "mips64", "big-endian MIPS64"}
 	Mips64le = Platform{'2', "mips64le", "MIPS64 (little-endian)"}
@@ -35,6 +36,7 @@ var (
 	Ppc64le  = Platform{'9', "ppc64le", "Power PC (64-bit, little-endian)"}
 	Riscv64  = Platform{'r', "riscv64", "RISC-V (64-bit)"}
 	S390x    = Platform{'z', "s390x", "IBM z/Architecture"}
+	Sparc64  = Platform{'s', "sparc64", "SPARC V9"}
 	// Operating systems
 	Aix       = Platform{'x', "aix", "IBM AIX"}
 	Android   = Platform{'a', "android", "Android"}
@@ -59,6 +61,7 @@ var Arch = []Platform{
 	Arm64,
 	I386,
 	Loong64,
+	M68k,
 	Mips,
 	Mips64,
 	Mips64le,
@@ -67,6 +70,7 @@ var Arch = []Platform{
 	Ppc64le,
 	Riscv64,
 	S390x,
+	Sparc64,
 }
 
 // OS is a slice of all known operating systems.
