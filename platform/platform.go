@@ -25,7 +25,7 @@ var (
 	Amd64    = Platform{'6', "amd64", "AMD64"}
 	Arm      = Platform{'5', "arm", "little-endian ARM"}
 	Arm64    = Platform{'7', "arm64", "little-endian ARM (64-bit)"}
-	I386     = Platform{'8', "i386", "Intel 80386 and compatibles"}
+	I386     = Platform{'8', "i386", "Intel 80386"}
 	Loong64  = Platform{'l', "loong64", "Loongson (64-bit)"}
 	M68k     = Platform{'m', "m68k", "Motorola 68000")
 	Mips     = Platform{'0', "mips", "big-endian MIPS32"}
@@ -42,15 +42,15 @@ var (
 	Aix       = Platform{'x', "aix", "IBM AIX"}
 	Android   = Platform{'a', "android", "Android"}
 	Bare      = Platform{'b', "bare", "Bare metal"}
-	Darwin    = Platform{'d', "darwin", "Darwin and derivatives"}
 	Dragonfly = Platform{'y', "dragonfly", "DragonFly BSD"}
 	Freebsd   = Platform{'f', "freebsd", "FreeBSD"}
 	Illumos   = Platform{'m', "illumos", "Illumos"}
 	Ios       = Platform{'i', "ios", "iOS"}
 	Linux     = Platform{'l', "linux", "Linux"}
+	Macos     = Platform{'m', "macos", "macOS"}
 	Netbsd    = Platform{'n', "netbsd", "NetBSD"}
 	Openbsd   = Platform{'o', "openbsd", "OpenBSD"}
-	Plan9     = Platform{'p', "plan9", "Plan 9 and derivatives"}
+	Plan9     = Platform{'p', "plan9", "Plan 9 from Bell Labs"}
 	Solaris   = Platform{'s', "solaris", "Oracle Solaris"}
 	Windows   = Platform{'w', "windows", "Windows NT"}
 )
@@ -80,12 +80,12 @@ var OS = []Platform{
 	Aix,
 	Android,
 	Bare,
-	Darwin,
 	Dragonfly,
 	Freebsd,
 	Illumos,
 	Ios,
 	Linux,
+	Macos,
 	Netbsd,
 	Openbsd,
 	Plan9,
@@ -93,14 +93,29 @@ var OS = []Platform{
 	Windows,
 }
 
-// Return the current CPU architecture and OS.
-func Current() (arch, os Platform) {
+// Return the current CPU architecture.
+func CurrentArch() Platform {
 	switch runtime.GOARCH {
 	case "386":
 		return WithCodeName(Arch, "i386"), WithCodeName(OS, runtime.GOOS)
 	default:
 		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, runtime.GOOS)
 	}
+}
+
+// Return the current OS.
+func CurrentOS() Platform {
+	switch runtime.GOOS {
+	case "darwin":
+		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, "macos")
+	default:
+		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, runtime.GOOS)
+	}
+}
+
+// Return the current CPU architecture and OS.
+func Current() (arch, os Platform) {
+	return CurrentArch(), CurrentOS()
 }
 
 // WithCodeChar returns the first platform in p with the given code character r.
