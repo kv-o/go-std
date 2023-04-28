@@ -55,7 +55,7 @@ type wlConn struct {
 	conn net.Conn
 }
 
-func wlListen(net.Conn, events chan Event) {
+func wlListen(conn net.Conn, events chan Event) {
 }
 
 func (w wlConn) Events() <-chan Event {

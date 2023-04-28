@@ -159,6 +159,7 @@ func Trace(w io.Writer, err std.Error) {
 		w = os.Stderr
 	}
 	fmt.Fprintln(w, "\nError traceback (most recent call last):\n")
+	defer fmt.Fprint("\n")
 	e := err
 	for ; e != nil; e = e.Parent() {
 		defer fmt.Fprintf(w, "\t%s:%d\n", e.File())

@@ -27,7 +27,7 @@ var (
 	Arm64    = Platform{'7', "arm64", "little-endian ARM (64-bit)"}
 	I386     = Platform{'8', "i386", "Intel 80386"}
 	Loong64  = Platform{'l', "loong64", "Loongson (64-bit)"}
-	M68k     = Platform{'m', "m68k", "Motorola 68000")
+	M68k     = Platform{'m', "m68k", "Motorola 68000"}
 	Mips     = Platform{'0', "mips", "big-endian MIPS32"}
 	Mips64   = Platform{'1', "mips64", "big-endian MIPS64"}
 	Mips64le = Platform{'2', "mips64le", "MIPS64 (little-endian)"}
@@ -97,9 +97,9 @@ var OS = []Platform{
 func CurrentArch() Platform {
 	switch runtime.GOARCH {
 	case "386":
-		return WithCodeName(Arch, "i386"), WithCodeName(OS, runtime.GOOS)
+		return WithCodeName(Arch, "i386")
 	default:
-		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, runtime.GOOS)
+		return WithCodeName(Arch, runtime.GOARCH)
 	}
 }
 
@@ -107,9 +107,9 @@ func CurrentArch() Platform {
 func CurrentOS() Platform {
 	switch runtime.GOOS {
 	case "darwin":
-		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, "macos")
+		return WithCodeName(OS, "macos")
 	default:
-		return WithCodeName(Arch, runtime.GOARCH), WithCodeName(OS, runtime.GOOS)
+		return WithCodeName(OS, runtime.GOOS)
 	}
 }
 
