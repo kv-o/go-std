@@ -9,21 +9,21 @@ package std
 // errors.Trace
 type Error interface {
 	// Program counter of the error origin.
-	Address()  uintptr
+	Address() uintptr
 	// Textual error description.
 	// Includes textual error descriptions of all ancestor errors.
-	Error()    string
+	Error() string
 	// Error source filename.
-	File()     string
+	File() string
 	// Name of the function in which the error occurred.
-	Func()     string
+	Func() string
 	// Update the error's source information.
 	Here()
 	// Offending line number in error source file.
-	Line()     int
+	Line() int
 	// Parent error which caused the current error.
-	Parent()   Error
+	Parent() Error
 	// Short textual error description.
 	// Does not include textual error descriptions of all ancestor errors.
-	Text()     string
+	Text() string
 }

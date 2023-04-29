@@ -34,6 +34,7 @@
 //				return err
 //			}
 //		}
+//		return nil
 //	}
 //
 // Alternatively, if the developer's intent is to return all received errors,
@@ -46,16 +47,42 @@ import (
 	"os"
 	"runtime"
 	"strings"
-
-	"codeberg.org/kvo/std"
 )
+
+// Error represents an error. The Error type holds a textual description of the
+// error and contextual information describing the source of the error. It also
+// holds a copy of its parent error, if one exists.
+//
+// Contextual information held in an Error can be used to trace back the source
+// of an error, and can be returned to the user through functions such as
+// errors.Trace
+type Error interface {
+	// Program counter of the error origin.
+	Address() uintptr
+	// Textual error description.
+	// Includes textual error descriptions of all ancestor errors.
+	Error() string
+	// Error source filename.
+	File() string
+	// Name of the function in which the error occurred.
+	Func() string
+	// Update the error's source information.
+	Here()
+	// Offending line number in error source file.
+	Line() int
+	// Parent error which caused the current error.
+	Parent() Error
+	// Short textual error description.
+	// Does not include textual error descriptions of all ancestor errors.
+	Text() string
+}
 
 type errtype struct {
 	address uintptr
 	file    string
 	fn      string
 	line    int
-	parent  std.Error
+	parent  Error
 	text    string
 }
 
@@ -65,7 +92,7 @@ func (e errtype) Address() uintptr {
 
 func (e errtype) Error() string {
 	var text string
-	var err std.Error
+	var err Error
 	for err = e; err.Parent() != nil; err = err.Parent() {
 		text += err.Text() + ": "
 	}
@@ -95,12 +122,30 @@ func (e errtype) Line() int {
 	return e.line
 }
 
-func (e errtype) Parent() std.Error {
+func (e errtype) Parent() Error {
 	return e.parent
 }
 
 func (e errtype) Text() string {
 	return e.text
+}
+
+// Has reports whether the textual error description of err or any of its parent
+// errors match the textual error description of target.
+func Has(err, target Error) bool {
+	e := err
+	for ; e != nil; e = e.Parent() {
+		if e.Text() == target.Text() {
+			return true
+		}
+	}
+	return false
+}
+
+// Is reports whether the textual error description of err matches the textual
+// error description of target.
+func Is(err, target Error) bool {
+	return err.Text() == target.Text()
 }
 
 // New returns an error whose textual error description is given by text, and 
@@ -110,7 +155,7 @@ func (e errtype) Text() string {
 // The current filename, line, program counter, and parent function name are
 // stored within the error interface. Each call to New returns a distinct error
 // value even if text is identical.
-func New(text string, err std.Error) std.Error {
+func New(text string, err Error) Error {
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
@@ -124,14 +169,14 @@ func New(text string, err std.Error) std.Error {
 	}
 }
 
-// Join returns a std.Error that combines the given errs. Any nil error values
+// Join returns a Error that combines the given errs. Any nil error values
 // are discarded. Join returns nil if errs contains no non-nil values. The
 // resultant error is formatted as a concatenation of the textual error
 // descriptions of all given errs, with a comma and space between each
 // description.
 //
 // An error can only have one parent, so the resultant error has nil parent.
-func Join(errs ...std.Error) std.Error {
+func Join(errs ...Error) Error {
 	var text string
 	for _, err := range errs {
 		if err != nil {
@@ -154,12 +199,12 @@ func Join(errs ...std.Error) std.Error {
 
 // Trace writes human-friendly error traceback information from err to w. If w
 // is nil, Trace writes to the standard error stream.
-func Trace(w io.Writer, err std.Error) {
+func Trace(w io.Writer, err Error) {
 	if w == nil {
 		w = os.Stderr
 	}
 	fmt.Fprintln(w, "\nError traceback (most recent call last):\n")
-	defer fmt.Fprint("\n")
+	defer fmt.Fprint(w, "\n")
 	e := err
 	for ; e != nil; e = e.Parent() {
 		defer fmt.Fprintf(w, "\t%s:%d\n", e.File())
