@@ -7,7 +7,11 @@
 // of useful identifiers for general programming.
 package std
 
-import "fmt"
+import (
+	"fmt"
+
+	"codeberg.org/kvo/std/errors"
+)
 
 // Access returns the nth element of slice s. Returns error if slice s does not
 // have an element at index n.
@@ -15,10 +19,13 @@ import "fmt"
 // For most access attempts on strings, []rune(str) will be a more appropriate
 // choice than []byte(str) for the parameter s, as no individual byte in
 // []byte(str) is guaranteed to hold a single Unicode code point.
-func Access[T any](s []T, n int) (T, error) {
+func Access[T any](s []T, n int) (T, errors.Error) {
 	var none T
 	if n > len(s)-1 || n < 0 {
-		return none, fmt.Errorf("index out of range [%d] with length %d", n, len(s))
+		return none, errors.New(
+			fmt.Sprintf("index out of range [%d] with length %d", n, len(s)),
+			nil,
+		)
 	}
 	return s[n], nil
 }
