@@ -209,7 +209,7 @@ func Trace(w io.Writer, err Error) {
 	defer fmt.Fprint(w, "\n")
 	e := err
 	for ; e != nil; e = e.Parent() {
-		defer fmt.Fprintf(w, "\t%s:%d\n", e.File())
+		defer fmt.Fprintf(w, "\t%s:%d\n", e.File(), e.Line())
 		defer fmt.Fprintf(w, "%s(...)\n", e.Func())
 	}
 }
