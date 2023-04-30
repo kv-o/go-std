@@ -205,11 +205,10 @@ func Trace(w io.Writer, err Error) {
 	if w == nil {
 		w = os.Stderr
 	}
-	fmt.Fprintf(w, "\nerror: %s\n", err.Error())
-	defer fmt.Fprint(w, "\n")
+	fmt.Fprintln(w, "Error traceback (most recent call last):")
 	e := err
 	for ; e != nil; e = e.Parent() {
-		defer fmt.Fprintf(w, "\t%s:%d\n", e.File(), e.Line())
-		defer fmt.Fprintf(w, "%s(...)\n", e.Func())
+		defer fmt.Fprintf(w, "\t%s\n", e.Text())
+		defer fmt.Fprintf(w, "%s:%d => %s(...)\n", e.File(), e.Line(), e.Func())
 	}
 }
