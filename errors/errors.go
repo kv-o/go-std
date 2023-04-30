@@ -135,6 +135,11 @@ func (e errtype) Text() string {
 // Has reports whether the textual error description of err or any of its parent
 // errors match the textual error description of target.
 func Has(err, target Error) bool {
+	if err == nil && target == nil {
+		return true
+	} else if target == nil {
+		return false
+	}
 	e := err
 	for ; e != nil; e = e.Parent() {
 		if e.Text() == target.Text() {
@@ -147,6 +152,11 @@ func Has(err, target Error) bool {
 // Is reports whether the textual error description of err matches the textual
 // error description of target.
 func Is(err, target Error) bool {
+	if err == nil && target == nil {
+		return true
+	} else if err == nil || target == nil {
+		return false
+	}
 	return err.Text() == target.Text()
 }
 
