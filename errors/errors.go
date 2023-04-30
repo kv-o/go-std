@@ -66,8 +66,8 @@ type Error interface {
 	File() string
 	// Name of the function in which the error occurred.
 	Func() string
-	// Update the error's source information.
-	Here()
+	// Return a copy of the error with its context set to the current context.
+	Here() Error
 	// Offending line number in error source file.
 	Line() int
 	// Parent error which caused the current error.
@@ -108,14 +108,16 @@ func (e errtype) Func() string {
 	return e.fn
 }
 
-func (e errtype) Here() {
+func (e errtype) Here() Error {
+	err := e
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
-	e.address = addr
-	e.file = file
-	e.fn = fn
-	e.line = line
+	err.address = addr
+	err.file = file
+	err.fn = fn
+	err.line = line
+	return err
 }
 
 func (e errtype) Line() int {
