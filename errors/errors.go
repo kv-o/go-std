@@ -185,6 +185,9 @@ func Join(errs ...Error) Error {
 			text += err.Text() + ", "
 		}
 	}
+	if text == "" {
+		return nil
+	}
 	strings.TrimSuffix(text, ", ")
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
