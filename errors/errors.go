@@ -205,7 +205,7 @@ func Trace(w io.Writer, err Error) {
 	if w == nil {
 		w = os.Stderr
 	}
-	fmt.Fprintln(w, "\nError traceback (most recent call last):\n")
+	fmt.Fprintf(w, "\nerror: %s\n", e.Error())
 	defer fmt.Fprint(w, "\n")
 	e := err
 	for ; e != nil; e = e.Parent() {
