@@ -1,3 +1,3 @@
-module codeberg.org/kvo/std
+module sr.ht/~kvo/libgo
 
-go 1.19
+go 1.20

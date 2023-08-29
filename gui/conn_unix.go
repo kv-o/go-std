@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"codeberg.org/kvo/std"
+	"sr.ht/~kvo/libgo/std"
 )
 
 // Wayland support.
