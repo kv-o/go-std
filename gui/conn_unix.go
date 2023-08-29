@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"sr.ht/~kvo/libgo/std"
+	"git.sr.ht/~kvo/libgo/std"
 )
 
 // Wayland support.
