@@ -10,7 +10,7 @@ package std
 import (
 	"fmt"
 
-	"sr.ht/~kvo/libgo/errors"
+	"git.sr.ht/~kvo/libgo/errors"
 )
 
 // Access returns the nth element of slice s. Returns error if slice s does not
