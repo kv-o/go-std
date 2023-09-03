@@ -5,3 +5,4 @@
 // the programmer in general programming cases do not exist in the standard Go
 // distribution. Package libgo attempts to resolve this issue by providing a set
 // of useful identifiers for general programming.
+package libgo
