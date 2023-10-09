@@ -58,7 +58,7 @@ import (
 // errors.Trace
 type Error interface {
 	// Program counter of the error origin.
-	Address() uintptr
+	Addr() uintptr
 	// Textual error description.
 	// Includes textual error descriptions of all ancestor errors.
 	Error() string
@@ -78,16 +78,16 @@ type Error interface {
 }
 
 type errtype struct {
-	address uintptr
-	file    string
-	fn      string
-	line    int
-	parent  Error
-	text    string
+	addr   uintptr
+	file   string
+	fn     string
+	line   int
+	parent Error
+	text   string
 }
 
-func (e errtype) Address() uintptr {
-	return e.address
+func (e errtype) Addr() uintptr {
+	return e.addr
 }
 
 func (e errtype) Error() string {
@@ -113,7 +113,7 @@ func (e errtype) Here() Error {
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
-	err.address = addr
+	err.addr = addr
 	err.file = file
 	err.fn = fn
 	err.line = line
@@ -160,7 +160,7 @@ func Is(err, target Error) bool {
 	return err.Text() == target.Text()
 }
 
-// New returns an error whose textual error description is given by text, and 
+// New returns an error whose textual error description is given by text, and
 // whose parent error is err. If the new error has no parent, err should be
 // given as nil.
 //
@@ -172,12 +172,12 @@ func New(text string, err Error) Error {
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
 	return errtype{
-		address: addr,
-		file:    file,
-		fn:      fn,
-		line:    line,
-		parent:  err,
-		text:    text,
+		addr:   addr,
+		file:   file,
+		fn:     fn,
+		line:   line,
+		parent: err,
+		text:   text,
 	}
 }
 
@@ -203,12 +203,12 @@ func Join(errs ...Error) Error {
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
 	return errtype{
-		address: addr,
-		file:    file,
-		fn:      fn,
-		line:    line,
-		parent:  nil,
-		text:    text,
+		addr:   addr,
+		file:   file,
+		fn:     fn,
+		line:   line,
+		parent: nil,
+		text:   text,
 	}
 }
 
@@ -218,10 +218,11 @@ func Trace(w io.Writer, err Error) {
 	if w == nil {
 		w = os.Stderr
 	}
-	fmt.Fprintln(w, "Error traceback (most recent call last):")
+	fmt.Fprintln(w, "Traceback (most recent call last):")
 	e := err
 	for ; e != nil; e = e.Parent() {
+		defer fmt.Fprintf(w, "\t%s:%d\n", e.File(), e.Line())
 		defer fmt.Fprintf(w, "\t%s\n", e.Text())
-		defer fmt.Fprintf(w, "%s:%d => %s(...)\n", e.File(), e.Line(), e.Func())
+		defer fmt.Fprintf(w, "%s(...)\n", e.Func())
 	}
 }
