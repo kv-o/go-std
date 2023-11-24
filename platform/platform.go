@@ -26,18 +26,18 @@ var (
 	Arm      = Platform{'5', "arm", "little-endian ARM"}
 	Arm64    = Platform{'7', "arm64", "little-endian ARM (64-bit)"}
 	I386     = Platform{'8', "i386", "Intel 80386"}
-	Loong64  = Platform{'l', "loong64", "Loongson (64-bit)"}
-	M68k     = Platform{'m', "m68k", "Motorola 68000"}
+	Loong64  = Platform{'ろ', "loong64", "Loongson (64-bit)"}
+	M68k     = Platform{'も', "m68k", "Motorola 68000"}
 	Mips     = Platform{'0', "mips", "big-endian MIPS32"}
 	Mips64   = Platform{'1', "mips64", "big-endian MIPS64"}
 	Mips64le = Platform{'2', "mips64le", "MIPS64 (little-endian)"}
 	Mipsle   = Platform{'3', "mipsle", "MIPS32 (little-endian)"}
-	Ppc      = Platform{'p', "ppc", "Power PC"}
+	Ppc      = Platform{'ほ', "ppc", "Power PC"}
 	Ppc64    = Platform{'4', "ppc64", "Power PC (64-bit)"}
 	Ppc64le  = Platform{'9', "ppc64le", "Power PC (64-bit, little-endian)"}
-	Riscv64  = Platform{'r', "riscv64", "RISC-V (64-bit)"}
-	S390x    = Platform{'z', "s390x", "IBM z/Architecture"}
-	Sparc64  = Platform{'s', "sparc64", "SPARC V9"}
+	Riscv64  = Platform{'り', "riscv64", "RISC-V (64-bit)"}
+	S390x    = Platform{'せ', "s390x", "IBM z/Architecture"}
+	Sparc64  = Platform{'さ', "sparc64", "SPARC V9"}
 	// Operating systems
 	Aix       = Platform{'x', "aix", "IBM AIX"}
 	Android   = Platform{'a', "android", "Android"}
