@@ -38,7 +38,8 @@
 //	}
 //
 // Alternatively, if the developer's intent is to return all received errors,
-// the Join function is provided to return all errors as one.
+// the Join function is provided to return all errors as one. However, this
+// removes the context behind the combined errors.
 package errors
 
 import (
@@ -56,59 +57,50 @@ import (
 // Contextual information held in an Error can be used to trace back the source
 // of an error, and can be returned to the user through functions such as
 // errors.Trace
-type Error interface {
-	// Program counter of the error origin.
-	Addr() uintptr
-	// Textual error description.
-	// Includes textual error descriptions of all ancestor errors.
-	Error() string
-	// Error source filename.
-	File() string
-	// Name of the function in which the error occurred.
-	Func() string
-	// Return a copy of the error with its context set to the current context.
-	Here() Error
-	// Offending line number in error source file.
-	Line() int
-	// Parent error which caused the current error.
-	Parent() Error
-	// Short textual error description.
-	// Does not include textual error descriptions of all ancestor errors.
-	Text() string
-}
-
-type errtype struct {
+type Error struct {
 	addr   uintptr
 	file   string
 	fn     string
 	line   int
-	parent Error
+	parent error
 	text   string
 }
 
-func (e errtype) Addr() uintptr {
+func (e Error) Addr() uintptr {
 	return e.addr
 }
 
-func (e errtype) Error() string {
+func (e Error) Error() string {
+	next := true
 	var text string
-	var err Error
-	for err = e; err.Parent() != nil; err = err.Parent() {
-		text += err.Text() + ": "
+	var err error = e
+	for next {
+		switch t := err.(type) {
+		case Error:
+			if t.Parent() == nil {
+				next = false
+				text += t.Text()
+			} else {
+				text += t.Text() + ": "
+				err = t.Parent()
+			}
+		case error:
+			text += t.Error()
+			next = false
+		}
 	}
-	text += err.Text()
 	return text
 }
 
-func (e errtype) File() string {
+func (e Error) File() string {
 	return e.file
 }
 
-func (e errtype) Func() string {
+func (e Error) Func() string {
 	return e.fn
 }
 
-func (e errtype) Here() Error {
+func (e Error) Here() error {
 	err := e
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
@@ -120,44 +112,81 @@ func (e errtype) Here() Error {
 	return err
 }
 
-func (e errtype) Line() int {
+func (e Error) Line() int {
 	return e.line
 }
 
-func (e errtype) Parent() Error {
+func (e Error) Parent() error {
 	return e.parent
 }
 
-func (e errtype) Text() string {
+func (e Error) Text() string {
 	return e.text
 }
 
 // Has reports whether the textual error description of err or any of its parent
 // errors match the textual error description of target.
-func Has(err, target Error) bool {
+func Has(err, target error) bool {
+	text := ""
 	if err == nil && target == nil {
 		return true
 	} else if target == nil {
 		return false
 	}
-	e := err
-	for ; e != nil; e = e.Parent() {
-		if e.Text() == target.Text() {
-			return true
+	switch t := target.(type) {
+	case Error:
+		text = t.Text()
+	case error:
+		text, _, _ = strings.Cut(t.Error(), ": ")
+	}
+	for {
+		switch t := err.(type) {
+		case Error:
+			if t.Text() == text {
+				return true
+			}
+			err = t.Parent()
+			if err == nil {
+				return false
+			}
+		case error:
+			utext, _, _ := strings.Cut(err.Error(), ": ")
+			if utext == text {
+				return true
+			} else {
+				return false
+			}
 		}
 	}
-	return false
 }
 
 // Is reports whether the textual error description of err matches the textual
 // error description of target.
-func Is(err, target Error) bool {
+func Is(err, target error) bool {
 	if err == nil && target == nil {
 		return true
 	} else if err == nil || target == nil {
 		return false
 	}
-	return err.Text() == target.Text()
+	switch t := err.(type) {
+	case Error:
+		switch u := target.(type) {
+		case Error:
+			return t.Text() == u.Text()
+		case error:
+			text, _, _ := strings.Cut(u.Error(), ": ")
+			return t.Text() == text
+		}
+	case error:
+		switch u := target.(type) {
+		case Error:
+			text, _, _ := strings.Cut(t.Error(), ": ")
+			return text == u.Text()
+		}
+	}
+	utext, _, _ := strings.Cut(err.Error(), ": ")
+	vtext, _, _ := strings.Cut(target.Error(), ": ")
+	return utext == vtext
 }
 
 // New returns an error whose textual error description is given by text, and
@@ -167,11 +196,11 @@ func Is(err, target Error) bool {
 // The current filename, line, program counter, and parent function name are
 // stored within the error interface. Each call to New returns a distinct error
 // value even if text is identical.
-func New(text string, err Error) Error {
+func New(text string, err error) error {
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
-	return errtype{
+	return Error{
 		addr:   addr,
 		file:   file,
 		fn:     fn,
@@ -181,28 +210,38 @@ func New(text string, err Error) Error {
 	}
 }
 
-// Join returns a Error that combines the given errs. Any nil error values
+// Join returns an error that combines the given errs. Any nil error values
 // are discarded. Join returns nil if errs contains no non-nil values. The
 // resultant error is formatted as a concatenation of the textual error
 // descriptions of all given errs, with a comma and space between each
 // description.
 //
 // An error can only have one parent, so the resultant error has nil parent.
-func Join(errs ...Error) Error {
+func Join(errs ...error) error {
+	first := true
 	var text string
 	for _, err := range errs {
 		if err != nil {
-			text += err.Text() + ", "
+			if first {
+				first = false
+			} else {
+				text += ", "
+			}
+			switch t := err.(type) {
+			case Error:
+				text += t.Text()
+			case error:
+				text += t.Error()
+			}
 		}
 	}
 	if text == "" {
 		return nil
 	}
-	strings.TrimSuffix(text, ", ")
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
-	return errtype{
+	return Error{
 		addr:   addr,
 		file:   file,
 		fn:     fn,
@@ -214,15 +253,25 @@ func Join(errs ...Error) Error {
 
 // Trace writes human-friendly error traceback information from err to w. If w
 // is nil, Trace writes to the standard error stream.
-func Trace(w io.Writer, err Error) {
+func Trace(w io.Writer, err error) {
 	if w == nil {
 		w = os.Stderr
 	}
-	fmt.Fprintln(w, "Traceback (most recent call last):")
-	e := err
-	for ; e != nil; e = e.Parent() {
-		defer fmt.Fprintf(w, "\t%s:%d\n", e.File(), e.Line())
-		defer fmt.Fprintf(w, "\t%s\n", e.Text())
-		defer fmt.Fprintf(w, "%s(...)\n", e.Func())
+	fmt.Fprintln(w, "Traceback (most recent call first):")
+	for {
+		switch t := err.(type) {
+		case Error:
+			defer fmt.Fprintf(w, "\t%s:%d\n", t.File(), t.Line())
+			defer fmt.Fprintf(w, "\t%s\n", t.Text())
+			defer fmt.Fprintf(w, "%s(...)\n", t.Func())
+			err = t.Parent()
+			if err == nil {
+				return
+			}
+		case error:
+			defer fmt.Fprintf(w, "\t%s\n", t.Error())
+			defer fmt.Fprintf(w, "no-context error:\n")
+			return
+		}
 	}
 }
