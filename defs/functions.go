@@ -12,7 +12,7 @@ import (
 // For most access attempts on strings, []rune(str) will be a more appropriate
 // choice than []byte(str) for the parameter s, as no individual byte in
 // []byte(str) is guaranteed to hold a single Unicode code point.
-func Get[T any](s []T, n int) (T, errors.Error) {
+func Get[T any](s []T, n int) (T, error) {
 	var none T
 	if n > len(s)-1 || n < 0 {
 		return none, errors.New(
