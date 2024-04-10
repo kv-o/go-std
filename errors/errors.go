@@ -16,10 +16,10 @@
 //	var EOF = errors.New("EOF")
 //
 // However, the context of this error is the line on which it is declared. To
-// update the contextual information, the Here method can be invoked when
+// update the contextual information, the Raise function can be invoked when
 // intending to raise a predefined error from a current context, like so:
 //
-//	io.EOF.Here()
+//	errors.Raise(EOF)
 //
 // A function which handles errors from multiple concurrently executing
 // processes should, in most cases, return the first error it receives:
@@ -100,9 +100,9 @@ func (e Error) Func() string {
 	return e.fn
 }
 
-func (e Error) Here() error {
+func (e Error) raise() error {
 	err := e
-	addr, file, line, _ := runtime.Caller(1)
+	addr, file, line, _ := runtime.Caller(2)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
 	err.addr = addr
@@ -249,6 +249,14 @@ func Join(errs ...error) error {
 		parent: nil,
 		text:   text,
 	}
+}
+
+func Raise(err error) error {
+	switch e := err.(type) {
+	case Error:
+		return e.raise()
+	}
+	return err
 }
 
 // Trace writes human-friendly error traceback information from err to w. If w
