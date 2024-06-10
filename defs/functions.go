@@ -3,7 +3,7 @@ package defs
 import (
 	"fmt"
 
-	"git.sr.ht/~kvo/libgo/errors"
+	"git.sr.ht/~kvo/go-std/errors"
 )
 
 // Get returns the nth element of slice s. Returns error if slice s does not
