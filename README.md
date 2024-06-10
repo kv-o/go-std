@@ -1,3 +1,3 @@
-# libgo
+# std
 
-Package libgo implements an alternative standard library.
+Package std implements an alternative standard library.
