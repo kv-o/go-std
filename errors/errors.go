@@ -7,13 +7,13 @@
 // human-friendly format.
 //
 // Errors are frequently caused by other errors. To account for this, the New
-// function takes two parameters: a textual description of the error and its
-// parent error.
+// function takes two sets of parameters: one representing a textual description
+// of the error and one representing its parent error.
 //
 // Package developers may choose to predefine certain errors, such as the io.EOF
 // error:
 //
-//	var EOF = errors.New("EOF")
+//	var EOF = errors.New(nil, "EOF")
 //
 // However, the context of this error is the line on which it is declared. To
 // update the contextual information, the Raise function can be invoked when
@@ -57,6 +57,9 @@ import (
 // Contextual information held in an Error can be used to trace back the source
 // of an error, and can be returned to the user through functions such as
 // errors.Trace
+//
+// Error implements the error interface. It only be used indirectly via
+// functions in this package, never directly.
 type Error struct {
 	addr   uintptr
 	file   string
@@ -189,14 +192,17 @@ func Is(err, target error) bool {
 	return utext == vtext
 }
 
-// New returns an error whose textual error description is given by text, and
-// whose parent error is err. If the new error has no parent, err should be
-// given as nil.
+// New returns an error whose textual error description is given by
+// fmt.Sprintf(format, a...) and whose parent error is err. If the new error has
+// no parent, err should be given as nil.
 //
 // The current filename, line, program counter, and parent function name are
 // stored within the error interface. Each call to New returns a distinct error
 // value even if text is identical.
-func New(text string, err error) error {
+//
+// To avoid writing New(err, ""), a call to Wrap(err) accomplishes the same
+// task.
+func New(err error, format string, a ...any) error {
 	addr, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(addr)
 	fn := f.Name()
@@ -206,7 +212,23 @@ func New(text string, err error) error {
 		fn:     fn,
 		line:   line,
 		parent: err,
-		text:   text,
+		text:   fmt.Sprintf(format, a...),
+	}
+}
+
+// Wrap is equivalent to New(err, "") in every way. Useful for maintaining
+// details in error stack traces without compromising visual aesthetics.
+func Wrap(err error) error {
+	addr, file, line, _ := runtime.Caller(1)
+	f := runtime.FuncForPC(addr)
+	fn := f.Name()
+	return Error{
+		addr:   addr,
+		file:   file,
+		fn:     fn,
+		line:   line,
+		parent: err,
+		text:   "",
 	}
 }
 
@@ -251,6 +273,8 @@ func Join(errs ...error) error {
 	}
 }
 
+// Raise returns the error equivalent to err whose program origin details (file,
+// name line number, etc.) are overridden with those of the caller of Raise.
 func Raise(err error) error {
 	switch e := err.(type) {
 	case Error:
@@ -270,14 +294,18 @@ func Trace(w io.Writer, err error) {
 		switch t := err.(type) {
 		case Error:
 			defer fmt.Fprintf(w, "\t%s:%d\n", t.File(), t.Line())
-			defer fmt.Fprintf(w, "\t%s\n", t.Text())
+			if t.Text() != "" {
+				defer fmt.Fprintf(w, "\t%s\n", t.Text())
+			}
 			defer fmt.Fprintf(w, "%s(...)\n", t.Func())
 			err = t.Parent()
 			if err == nil {
 				return
 			}
 		case error:
-			defer fmt.Fprintf(w, "\t%s\n", t.Error())
+			if t.Error() != "" {
+				defer fmt.Fprintf(w, "\t%s\n", t.Error())
+			}
 			defer fmt.Fprintf(w, "no-context error:\n")
 			return
 		}
