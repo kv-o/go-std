@@ -1,8 +1,6 @@
-package defs
+package slices
 
 import (
-	"fmt"
-
 	"git.sr.ht/~kvo/go-std/errors"
 )
 
@@ -15,15 +13,14 @@ import (
 func Get[T any](s []T, n int) (T, error) {
 	var none T
 	if n > len(s)-1 || n < 0 {
-		return none, errors.New(
-			fmt.Sprintf("index out of range [%d] with length %d", n, len(s)),
-			nil,
+		return none, errors.New(nil,
+			"index out of range [%d] with length %d", n, len(s),
 		)
 	}
 	return s[n], nil
 }
 
-// Contains checks slice s for the existence of an element elem.
+// Has checks slice s for the existence of an element elem.
 func Has[T comparable](s []T, elem T) bool {
 	for _, v := range s {
 		if v == elem {
